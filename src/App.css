@@ -133,6 +133,7 @@ ul a ,  .second-section  h1, span{
 .second-section {
   display: flex;
   justify-content: space-around;
+  gap : 4.5em;
   padding :0 rem; 
   margin-top: 2rem;
   flex-wrap: wrap;
@@ -326,6 +327,13 @@ footer{
     gap: 5px; /* Smaller spacing */
     padding-top: 10px;
   }
+
+  .second-section{
+    flex-direction: column;
+    padding: 1em;
+    gap : 1rem;
+  }
+
 }
 
 @media (max-width: 374px) {
@@ -340,11 +348,3 @@ footer{
   }
 
 }
-
-
-
-
-
-
-
-

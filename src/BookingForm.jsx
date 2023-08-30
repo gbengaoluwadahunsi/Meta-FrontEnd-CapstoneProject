@@ -1,17 +1,41 @@
 
-import  { useState } from 'react';
+import  { useState , useReducer  } from 'react';
+import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
-const BookingForm = () => {
+
+const initializeTimes = async () => {
+  const today = new Date();
+  const formattedDate = today.toISOString().split('T')[0];
+  const times = await fetchAPI(formattedDate);
+  return times;
+};
+
+const availableTimesReducer = async (state, action) => {
+  switch (action.type) {
+    case 'UPDATE_TIMES':
+      const updatedTimes = await fetchAPI(action.selectedDate); // Pass selected date
+      return updatedTimes;
+    default:
+      return state;
+  }
+};
+
+const calculateUpdatedTimes = (selectedDate) => {
+  // For now, just return the same available times regardless of the date
+  return initializeTimes();
+};
+
+
+const BookingForm = ({availableTimes, setAvailableTimes, submitForm }) => {
   const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('choose time');
+  const [selectedTime, setSelectedTime] = useState('');
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [selectedOccasion, setSelectedOccasion] = useState('Choose occasion');
   const [isFormValid, setIsFormValid] = useState(false);
-
-  const availableTimes = [
-    'Choose time', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'
-  ];
-
+  const [times, dispatch] = useReducer(availableTimesReducer, initializeTimes());
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  
   const availableOccasions = [
     'Choose occasion' ,'Birthday', 'Anniversary', 'Bridal/Baby', 'Live Entertainment',
     'Product Launch', 'Just Because I want to', 'Others'
@@ -19,6 +43,8 @@ const BookingForm = () => {
 
   const handleDateChange = (event) => {
     setSelectedDate(event.target.value);
+    const updatedTimes = calculateUpdatedTimes(event.target.value); // Implement this function
+    dispatch({ type: 'UPDATE_TIMES', times: updatedTimes }); // Pass updatedTimes to the reducer
     validateForm();
   };
 
@@ -46,21 +72,25 @@ const BookingForm = () => {
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async(event) => {
     event.preventDefault();
     setSelectedDate("");
     setSelectedTime("Choose time");
     setNumberOfGuests(1);
     setSelectedOccasion("Choose Occasion");
+    setIsFormSubmitted(true);
+    
+
     
 
     if (isFormValid) {
-    
+      dispatch({ type: 'UPDATE_TIMES' });
       console.log('Form submitted successfully!');
       // You can perform further actions here, like sending the form data to an API
     } else {
       console.log('Form submission failed: Some fields are missing.');
     }
+    
   };
 
   return (
@@ -69,7 +99,7 @@ const BookingForm = () => {
       <form className='reservation-form' method='post'  onSubmit={handleSubmit}>
         <div>
             <label htmlFor="res-date">Choose date</label>
-            <input type="date" id="res-date" name="date"  required value={selectedDate} onChange={handleDateChange}/>
+            <input type="date" id="res-date" name="date"  required value={selectedDate}  onChange={handleDateChange}/>
         </div>
         
         <div>
@@ -114,5 +144,9 @@ const BookingForm = () => {
   );
 }
 
+BookingForm.propTypes = {
+  availableTimes: PropTypes.array.isRequired,
+  setAvailableTimes: PropTypes.func.isRequired,
+};
 export default BookingForm;
 
